@@ -15,7 +15,7 @@
 			<div class='section-block'>
 				<span class='section-label'>Projects</span>
 				
-				<a href='https://github.com/Aethese/Switchence' target='_blank' rel='noopener' class='project-card'>
+				<a href='https://github.com/Aethese/Switchence' target='_blank' rel='noopener' class='project-card' data-repo='Aethese/Switchence'>
 					<div class='project-header'>
 						<div class='project-title'>Switchence</div>
 						<span class='arrow'>↗</span>
@@ -24,13 +24,13 @@
 						Simple Nintendo Switch rich presence app for Discord.
 					</p>
 					<div class='project-stats'>
-						<span class='stat-item stat-stars' id='switchence-stars'>★ --</span>
-						<span class='stat-item stat-updated' id='switchence-updated'>Updated --</span>
-						<span class='stat-item stat-version' id='switchence-version' style='display: none;'>--</span>
+						<span class='stat-item stat-stars'>★ --</span>
+						<span class='stat-item stat-updated'>Updated --</span>
+						<span class='stat-item stat-version' style='display: none;'>--</span>
 					</div>
 				</a>
 
-				<a href='https://github.com/Aethese/MAL-Pal' target='_blank' rel='noopener' class='project-card'>
+				<a href='https://github.com/Aethese/MAL-Pal' target='_blank' rel='noopener' class='project-card' data-repo='Aethese/MAL-Pal'>
 					<div class='project-header'>
 						<div class='project-title'>MAL Pal</div>
 						<span class='arrow'>↗</span>
@@ -39,9 +39,24 @@
 						Adds new features to MyAnimeList to make browsing easier and more convenient.
 					</p>
 					<div class='project-stats'>
-						<span class='stat-item stat-stars' id='malpal-stars'>★ --</span>
-						<span class='stat-item stat-updated' id='malpal-updated'>Updated --</span>
-						<span class='stat-item stat-version' id='malpal-version' style='display: none;'>--</span>
+						<span class='stat-item stat-stars'>★ --</span>
+						<span class='stat-item stat-updated'>Updated --</span>
+						<span class='stat-item stat-version' style='display: none;'>--</span>
+					</div>
+				</a>
+
+				<a href='https://github.com/Aethese/aethese.github.io' target='_blank' rel='noopener' class='project-card' data-repo='Aethese/aethese.github.io'>
+					<div class='project-header'>
+						<div class='project-title'>aethese.github.io</div>
+						<span class='arrow'>↗</span>
+					</div>
+					<p class='project-desc'>
+						Source code for this website.
+					</p>
+					<div class='project-stats'>
+						<span class='stat-item stat-stars'>★ --</span>
+						<span class='stat-item stat-updated'>Updated --</span>
+						<span class='stat-item stat-version' style='display: none;'>--</span>
 					</div>
 				</a>
 			</div>
@@ -91,33 +106,64 @@
 	</div>
 
 	<script>
-		async function fetchRepoStats(repoPath, idPrefix) {
+		async function fetchRepoStats(card) {
 			try {
-				const repoRes = await fetch('https://api.github.com/repos/' + repoPath);
-				if (!repoRes.ok) return;
-				const repoData = await repoRes.json();
+				const repoPath = card.getAttribute('data-repo');
+				if (!repoPath) return;
+
+				const cacheKey = 'repoStats_' + repoPath;
+				const cachedStr = localStorage.getItem(cacheKey);
+				let data = null;
+
+				if (cachedStr) {
+					const cache = JSON.parse(cachedStr);
+					if (Date.now() - cache.timestamp < 3600000) {
+						data = cache.data;
+					}
+				}
+
+				if (!data) {
+					const repoRes = await fetch('https://api.github.com/repos/' + repoPath);
+					if (!repoRes.ok) return;
+					const repoData = await repoRes.json();
+
+					let tagName = null;
+					const releaseRes = await fetch('https://api.github.com/repos/' + repoPath + '/releases/latest');
+					if (releaseRes.ok) {
+						const releaseData = await releaseRes.json();
+						tagName = releaseData.tag_name;
+					}
+
+					data = {
+						stargazers_count: repoData.stargazers_count,
+						pushed_at: repoData.pushed_at,
+						updated_at: repoData.updated_at,
+						tag_name: tagName
+					};
+
+					localStorage.setItem(cacheKey, JSON.stringify({
+						timestamp: Date.now(),
+						data: data
+					}));
+				}
 
 				// Stars
-				const starsEl = document.getElementById(idPrefix + '-stars');
-				if (starsEl) starsEl.textContent = '★ ' + repoData.stargazers_count;
+				const starsEl = card.querySelector('.stat-stars');
+				if (starsEl) starsEl.textContent = '★ ' + data.stargazers_count;
 
 				// Last updated
-				const updatedEl = document.getElementById(idPrefix + '-updated');
-				if (updatedEl && (repoData.pushed_at || repoData.updated_at)) {
-					const d = new Date(repoData.pushed_at || repoData.updated_at);
+				const updatedEl = card.querySelector('.stat-updated');
+				if (updatedEl && (data.pushed_at || data.updated_at)) {
+					const d = new Date(data.pushed_at || data.updated_at);
 					const formatted = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 					updatedEl.textContent = 'Updated ' + formatted;
 				}
 
 				// Version tag
-				const releaseRes = await fetch('https://api.github.com/repos/' + repoPath + '/releases/latest');
-				if (releaseRes.ok) {
-					const releaseData = await releaseRes.json();
-					const versionEl = document.getElementById(idPrefix + '-version');
-					if (versionEl && releaseData.tag_name) {
-						versionEl.textContent = releaseData.tag_name;
-						versionEl.style.display = 'inline-flex';
-					}
+				const versionEl = card.querySelector('.stat-version');
+				if (versionEl && data.tag_name) {
+					versionEl.textContent = data.tag_name;
+					versionEl.style.display = 'inline-flex';
 				}
 			} catch (err) {
 				// error silently
@@ -125,8 +171,8 @@
 		}
 
 		document.addEventListener('DOMContentLoaded', () => {
-			fetchRepoStats('Aethese/Switchence', 'switchence');
-			fetchRepoStats('Aethese/MAL-Pal', 'malpal');
+			const cards = document.querySelectorAll('.project-card[data-repo]');
+			cards.forEach(card => fetchRepoStats(card));
 		});
 	</script>
 </body>
