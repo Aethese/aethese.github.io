@@ -27,6 +27,7 @@
 						<span class='stat-item stat-stars'>★ --</span>
 						<span class='stat-item stat-updated'>Updated --</span>
 						<span class='stat-item stat-version' style='display: none;'>--</span>
+						<span class='stat-item stat-downloads' style='display: none;'><svg viewBox='0 0 24 24'><path d='M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z'/></svg><span class='download-count'>--</span></span>
 					</div>
 				</a>
 
@@ -42,6 +43,7 @@
 						<span class='stat-item stat-stars'>★ --</span>
 						<span class='stat-item stat-updated'>Updated --</span>
 						<span class='stat-item stat-version' style='display: none;'>--</span>
+						<span class='stat-item stat-downloads' style='display: none;'><svg viewBox='0 0 24 24'><path d='M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z'/></svg><span class='download-count'>--</span></span>
 					</div>
 				</a>
 
@@ -57,6 +59,7 @@
 						<span class='stat-item stat-stars'>★ --</span>
 						<span class='stat-item stat-updated'>Updated --</span>
 						<span class='stat-item stat-version' style='display: none;'>--</span>
+						<span class='stat-item stat-downloads' style='display: none;'><svg viewBox='0 0 24 24'><path d='M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z'/></svg><span class='download-count'>--</span></span>
 					</div>
 				</a>
 			</div>
@@ -128,17 +131,34 @@
 					const repoData = await repoRes.json();
 
 					let tagName = null;
-					const releaseRes = await fetch('https://api.github.com/repos/' + repoPath + '/releases/latest');
+					let downloadCount = null;
+					const releaseRes = await fetch('https://api.github.com/repos/' + repoPath + '/releases?per_page=100');
 					if (releaseRes.ok) {
-						const releaseData = await releaseRes.json();
-						tagName = releaseData.tag_name;
+						const releasesData = await releaseRes.json();
+						if (releasesData.length > 0) {
+							const latestRelease = releasesData.find(r => !r.prerelease);
+							if (latestRelease) {
+								tagName = latestRelease.tag_name;
+							} else {
+								tagName = releasesData[0].tag_name;
+							}
+							downloadCount = 0;
+							for (const release of releasesData) {
+								if (release.assets && release.assets.length > 0) {
+									for (const asset of release.assets) {
+										downloadCount += asset.download_count || 0;
+									}
+								}
+							}
+						}
 					}
 
 					data = {
 						stargazers_count: repoData.stargazers_count,
 						pushed_at: repoData.pushed_at,
 						updated_at: repoData.updated_at,
-						tag_name: tagName
+						tag_name: tagName,
+						download_count: downloadCount
 					};
 
 					localStorage.setItem(cacheKey, JSON.stringify({
@@ -164,6 +184,14 @@
 				if (versionEl && data.tag_name) {
 					versionEl.textContent = data.tag_name;
 					versionEl.style.display = 'inline-flex';
+				}
+
+				// Downloads
+				const downloadsEl = card.querySelector('.stat-downloads');
+				if (downloadsEl && data.download_count != null) {
+					const countEl = downloadsEl.querySelector('.download-count');
+					if (countEl) countEl.textContent = data.download_count.toLocaleString();
+					downloadsEl.style.display = 'inline-flex';
 				}
 			} catch (err) {
 				// error silently

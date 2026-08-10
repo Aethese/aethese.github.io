@@ -137,6 +137,17 @@ h1 {
 	border-color: rgba(56, 189, 248, 0.2);
 }
 
+.stat-downloads {
+	color: #c084fc;
+	border-color: rgba(192, 132, 252, 0.25);
+}
+
+.stat-downloads svg {
+	width: 14px;
+	height: 14px;
+	fill: currentColor;
+}
+
 .stat-stars {
 	color: #fbbf24;
 	border-color: rgba(251, 191, 36, 0.25);
