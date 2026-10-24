@@ -158,6 +158,19 @@ h1 {
 	border-color: rgba(74, 222, 128, 0.25);
 }
 
+.stat-lang {
+	--lang-color: #f472b6;
+	color: var(--lang-color);
+	border-color: color-mix(in srgb, var(--lang-color) 25%, transparent);
+}
+
+.lang-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background-color: currentColor;
+}
+
 .links-list {
 	list-style: none;
 	display: flex;
