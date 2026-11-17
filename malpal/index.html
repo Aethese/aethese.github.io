@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+	<meta charset='UTF-8'>
+	<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+	<title>MAL Pal</title>
+	<link rel='icon' type='image/png' href='logo.png'/>
+	<link href='style.css' rel='stylesheet'>
+</head>
+<body>
+	<header>
+		<img src='logo.png' style='width: 48px; height: 48px;'>
+		<h1>MAL Pal</h1>
+	</header>
+
+	<p>
+		A Chromium and Firefox extension to enhance your MyAnimeList experience. View watch hours, category percentages, local broadcast times, watch lengths, account ages, and airing durations directly on MAL pages, with every feature toggleable from the extension pop-up.
+	</p>
+
+	<div class='links'>
+		<a class='button' href='https://chromewebstore.google.com/detail/mal-pal/jegmpjgnklkpcgdbadphgnelkcdfdpob' target='_blank' rel='noopener noreferrer'>Chromium</a>
+		<a class='button' href='https://addons.mozilla.org/en-US/firefox/addon/mal-pal/' target='_blank' rel='noopener noreferrer'>Firefox</a>
+		<a class='button' href='latest-updates.html' rel='noopener noreferrer'>Latest Updates</a>
+	</div>
+
+	<p style='font-size: .95em; margin-top: 40px;'>
+		Below is what the MAL Pal's pop-up looks like. Click any option to see a preview of what it does :)
+	</p>
+
+	<button class='dropdown' id='round_top'>Show Hours on Profile</button>
+	<div class='description'>
+		<h3>Displays total Anime and Manga hours next to the 'Days' stat on user profiles</h3>
+		<img src='previews/hours.png' alt='Show Hours on Profile'>
+	</div>
+
+	<button class='dropdown'>Show Category Percentage Tooltips</button>
+	<div class='description'>
+		<h3>Hover over any status count (e.g., Completed, Watching) on a profile to see its percentage of total entries</h3>
+		<img src='previews/category-percentage.png' alt='Show Category Percentage Tooltips'>
+	</div>
+
+	<button class='dropdown'>View Local Time for Broadcasts</button>
+	<div class='description'>
+		<h3>See the broadcasting time for any Anime in your local time in the Information Panel (hover for original JST time)</h3>
+		<img src='previews/local-broadcast.png' alt='View Local Time for Broadcasts'>
+	</div>
+
+	<button class='dropdown'>View Watch Time Length</button>
+	<div class='description'>
+		<h3>View how long it will take to finish an anime. Watch length will be besides the episode counter on Anime pages</h3>
+		<img src='previews/watch-length.png' alt='View Watch Time Length'>
+	</div>
+
+	<button class='dropdown'>Show Watch Time in History</button>
+	<div class='description'>
+		<h3>Displays the estimated time spent watching or reading next to each day in a user's history</h3>
+		<img src='previews/history-hours.png' alt='Show Watch Time in History'>
+	</div>
+
+	<button class='dropdown'>Show Account Age in Years</button>
+	<div class='description'>
+		<h3>Displays how many years ago a user created their account next to their join date</h3>
+		<img src='previews/account-age.png' alt='Show Account Age in Years'>
+	</div>
+
+	<button class='dropdown' id='round_bottom'>Show Airing Run Duration</button>
+	<div class='description'>
+		<h3>See how long an anime has been airing (or aired) next to its Aired date in the Information Panel</h3>
+		<img src='previews/airing-duration.png' alt='Show Airing Run Duration'>
+	</div>
+
+	<div class='footer'>
+		<p>Made by Aethese - malpal@aethese.com</p>
+		<div class='footerVersion'>
+			<a href='https://github.com/Aethese/MAL-Pal/' target='_blank' rel='noopener noreferrer'><img src='github-logo.png' style='width: 24px; height: 24px; display: block;'></a>
+		</div>
+	</div>
+
+	<script>
+		let dropdowns = document.getElementsByClassName('dropdown');
+		for (let i=0; i<dropdowns.length; i++)
+		{
+			dropdowns[i].addEventListener('click', function()
+			{
+				this.classList.toggle('active');
+
+				let panel = this.nextElementSibling;
+				if (panel.style.maxHeight)
+				{
+					if (this.id === 'xround_bottom')
+					{
+						this.id = 'round_bottom';
+						panel.id = 'xround_bottom';
+					}
+					panel.style.maxHeight = null;
+				}
+				else
+				{
+					const description = document.querySelector(`body > div:nth-child(${4 + ((i+1) * 2)}) > h3`).textContent;
+					const charLength = Math.floor(description.length / 3);
+
+					panel.style.maxHeight = Math.max(panel.scrollHeight + charLength, 75) + 'px';
+
+					if (this.id === 'round_bottom')
+					{
+						this.id = 'xround_bottom';
+						panel.id = 'round_bottom';
+					}
+				}
+			});
+		}
+	</script>
+</body>
+</html>
